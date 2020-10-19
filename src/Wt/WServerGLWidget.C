@@ -47,6 +47,10 @@ typedef GLXContext (*glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXC
 #include <OpenGL/OpenGL.h>
 #endif
 
+#ifdef USE_TURBOJPEG
+#include <turbojpeg.h>
+#endif
+
 namespace {
   GLenum serverGLenum(Wt::WGLWidget::GLenum e);
 }
@@ -1780,6 +1784,35 @@ void WServerGLWidget::render(const std::string& jsRef, WFlags<RenderFlag> flags)
   impl_->setDrawBuffer();
 #endif
 
+#ifdef USE_TURBOJPEG
+  // use turbo-jpeg  
+  unsigned char* jpegBuf = NULL;
+  unsigned long jpegSize = 0;
+  // encode framebuffer
+  {
+    tjhandle tjInstance = tjInitCompress();
+    tjCompress2(tjInstance, pixelData.data(), renderWidth_, 0, renderHeight_, TJPF_RGBA, 
+      &jpegBuf, &jpegSize, TJSAMP_444, 85, 0);
+    tjDestroy(tjInstance);
+  }
+  // flip vertically
+  {
+    unsigned char* dstBuf = NULL;
+    unsigned long dstSize = 0;
+    tjtransform xform;
+    memset(&xform, 0, sizeof(tjtransform));
+    xform.op = TJXOP_VFLIP;
+    tjhandle tjInstance = tjInitTransform();
+    tjTransform(tjInstance, jpegBuf, jpegSize, 1, &dstBuf, &dstSize, &xform, 0);
+    tjFree(jpegBuf);
+    tjDestroy(tjInstance);
+    jpegBuf = dstBuf;
+    jpegSize = dstSize;
+  }
+  // set to memory resource
+  memres_->setData(jpegBuf, jpegSize);
+  tjFree(jpegBuf);
+#else
   if (!raster_)
     raster_ = new WRasterImage("png", renderWidth_, renderHeight_);
   int idx = 0;
@@ -1799,6 +1832,7 @@ void WServerGLWidget::render(const std::string& jsRef, WFlags<RenderFlag> flags)
   raster_->write(sstream);
   std::string tmp = sstream.str();
   memres_->setData(reinterpret_cast<const unsigned char*>(tmp.c_str()), tmp.size());
+#endif
   }
   memres_->generateUrl();
   impl_->unmakeCurrent();

@@ -683,3 +683,13 @@ IF(MSVC)
 ENDIF(MSVC)
 
 SUBDIRS(isapi fcgi http)
+
+# TurboJpeg
+OPTION(USE_TURBOJPEG "Use turbo-jpeg for encoding server side GLWidget framebuffer" ON)
+IF(USE_TURBOJPEG)
+	add_definitions(-DUSE_TURBOJPEG)
+	find_path(TURBOJPEG_INCLUDE turbojpeg.h REQUIRED)
+	find_library(TURBOJPEG_LIBRARY turbojpeg-static.lib REQUIRED)
+	TARGET_INCLUDE_DIRECTORIES(wt PUBLIC ${TURBOJPEG_INCLUDE})
+	TARGET_LINK_LIBRARIES(wt PRIVATE ${TURBOJPEG_LIBRARY})	
+ENDIF(USE_TURBOJPEG)
