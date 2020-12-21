@@ -1796,7 +1796,7 @@ void WServerGLWidget::render(const std::string& jsRef, WFlags<RenderFlag> flags)
     tjDestroy(tjInstance);
   }
   // flip vertically
-  {
+  if (false) {
     unsigned char* dstBuf = NULL;
     unsigned long dstSize = 0;
     tjtransform xform;
