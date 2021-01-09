@@ -947,6 +947,13 @@ public:
    * letters, digits ([0-9]), hyphens ("-"), underscores ("_"), colons (":"),
    * and periods (".").
    *
+   * \warning We recommend that you leave the id of a widget unchanged. %Wt
+   * uses the id to identify widgets in the JavaScript it generates,
+   * and this can often leads to bugs. If you do change the id, **only** change
+   * the id right after widget construction. However, usually
+   * there's a more preferable alternative, like setting the object name
+   * (WObject::setObjectName), or adding style classes (WWidget::addStyleClass).
+   *
    * \sa WObject::id()
    */
   virtual void setId(const std::string& id) = 0;
@@ -1356,7 +1363,8 @@ private:
   static const int BIT_HAS_PARENT = 4;
   static const int BIT_RESIZE_AWARE = 5;
   static const int BIT_SCROLL_VISIBILITY_ENABLED = 6;
-  std::bitset<7> flags_;
+  static const int BIT_GLOBAL_WIDGET = 7;
+  std::bitset<8> flags_;
 
   EventSignalList eventSignals_;
   std::vector<EventSignalBase*> jsignals_;
@@ -1366,6 +1374,9 @@ private:
   void undoHideShow();
   void undoDisableEnable();
   virtual void setParentWidget(WWidget *parent);
+
+  bool isGlobalWidget() const;
+  void setGlobalWidget(bool globalWidget);
 
   virtual WWebWidget *webWidget() = 0;
 
