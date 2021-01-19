@@ -1792,7 +1792,7 @@ void WServerGLWidget::render(const std::string& jsRef, WFlags<RenderFlag> flags)
   {
     tjhandle tjInstance = tjInitCompress();
     tjCompress2(tjInstance, pixelData.data(), renderWidth_, 0, renderHeight_, TJPF_RGBA, 
-      &jpegBuf, &jpegSize, TJSAMP_444, 85, 0);
+      &jpegBuf, &jpegSize, TJSAMP_444, TURBOJPEG_QUALITY, TJFLAG_FASTDCT);
     tjDestroy(tjInstance);
   }
   // flip vertically
